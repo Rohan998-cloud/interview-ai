@@ -5,7 +5,7 @@ const tokenBlacklistModel = require("../models/blacklist.model")
 
 const cookieOptions = {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     secure: process.env.NODE_ENV === "production",
     maxAge: 24 * 60 * 60 * 1000
 }
@@ -135,7 +135,11 @@ async function logoutUserController(req, res) {
         }
     }
 
-    res.clearCookie("token", { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" })
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NODE_ENV === "production"
+    })
 
     res.status(200).json({
         message: "User logged out successfully"

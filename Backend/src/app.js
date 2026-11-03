@@ -4,13 +4,23 @@ const cors = require("cors")
 
 const app = express()
 
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+
 app.disable("x-powered-by")
 app.use(express.json({ limit: "1mb" }))
 app.use(cookieParser())
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
+        return callback(new Error("Origin is not allowed by CORS"))
+    },
     credentials: true
 }))
+
+app.get("/health", (req, res) => res.status(200).json({ status: "ok" }))
 
 /* require all the routes here */
 const authRouter = require("./routes/auth.routes")
